@@ -1,25 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using movie_list.Models;
 using System.Diagnostics;
-using movie_list.ApiClient;
 
 namespace movie_list.Controllers
 {
-    public class HomeController : Controller
+    public class AuthController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<AuthController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, MovieApiClient apiClient)
+        public AuthController(ILogger<AuthController> logger)
         {
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Login()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Register()
         {
             return View();
         }

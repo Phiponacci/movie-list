@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Movies";
+}
+@model List<Movie>
+
+<div class="container">
+    <div class="row">
+        @foreach (Movie movie in Model)
+        {
+            <div class="col-md-4 col-lg-3 col-sm-6 p-2">
+                <div class="card p-2" style="width: 18rem;">
+                    <img src="@movie.posterImage!.url" class="card-img-top" style="height: 400px;" alt="...">
+
+                    <div class="card-body">
+                        <h6 class="card-title">@movie.name</h6>
+                        <p class="card-text">@movie.releaseDate</p>
+                        <button class="btn btn-primary">Add to watch list</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
