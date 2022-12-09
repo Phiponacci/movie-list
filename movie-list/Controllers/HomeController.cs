@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using movie_list.Models;
 using System.Diagnostics;
+using movie_list.ApiClient;
 
 namespace movie_list.Controllers
 {
@@ -8,7 +9,7 @@ namespace movie_list.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, MovieApiClient apiClient)
         {
             _logger = logger;
         }
