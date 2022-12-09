@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using movie_list.Models;
-using System.Diagnostics;
-using movie_list.ApiClient;
 using movie_list.Data;
 using Microsoft.EntityFrameworkCore;
 using movie_list.Areas.Identity.Data;
@@ -17,16 +15,35 @@ namespace movie_list.Controllers
             _db = db;
         }
 
+        private AppUser? GetUser()
+        {
+            var username = User.Identity!.Name;
+            return (from u in _db.Users
+                    where string.Equals(username, u.UserName)
+                    select u)
+                .Include(_user => _user.WatchList!)
+                .ThenInclude(watchList => watchList.posterImage)
+                .FirstOrDefault();
+        }
+
+        private List<Movie> GetUserWatchList(AppUser user)
+        {
+            return (from m in _db.Movies
+                   where m.Users!.Count(_user => string.Equals(user.UserName, _user.UserName)) > 0
+                   select m).ToList();
+        }
+
         public IActionResult MyWatchList()
         {
             if (!User.Identity!.IsAuthenticated)
             {
                 return Redirect("~/Identity/Account/Login");
             }
-            var user = _db.Users.Include(_user => _user.WatchList!).ThenInclude(watchList=>watchList.posterImage).FirstOrDefault(_user => _user.UserName.Equals(User.Identity!.Name));
+            var user = GetUser();
             if (user != default(AppUser))
             {
-                return View(user.WatchList!.ToList());
+                var watchList = GetUserWatchList(user);
+                return View(watchList);
             }
             return View();
         }
@@ -37,8 +54,7 @@ namespace movie_list.Controllers
             {
                 return Redirect("~/Identity/Account/Login");
             }
-            var username = User.Identity!.Name;
-            var user = _db.Users.Include(_user => _user.WatchList).FirstOrDefault(_user => _user.UserName.Equals(username));
+            var user = GetUser();
             var movie = user!.WatchList!.FirstOrDefault(movie => movie.name!.Equals(movieName));
 
             if (movie != default(Movie))

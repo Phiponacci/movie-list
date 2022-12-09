@@ -4,6 +4,7 @@ using System.Diagnostics;
 using movie_list.ApiClient;
 using movie_list.Data;
 using Microsoft.EntityFrameworkCore;
+using movie_list.Areas.Identity.Data;
 
 namespace movie_list.Controllers
 {
@@ -30,25 +31,43 @@ namespace movie_list.Controllers
             return View(AllMovies);
         }
 
+        private AppUser? GetUser()
+        {
+            var username = User.Identity!.Name;
+            return (from u in _db.Users
+                    where string.Equals(username, u.UserName)
+                    select u)
+                .Include(_user => _user.WatchList!)
+                .FirstOrDefault();
+        }
+
+        private List<Movie> GetUserWatchList(AppUser user)
+        {
+            return (from m in _db.Movies
+                    where m.Users!.Count(_user => string.Equals(user.UserName, _user.UserName)) > 0
+                    select m).ToList();
+        }
+
         public IActionResult AddToWatchList(string movieName)
         {
             if (!User.Identity!.IsAuthenticated)
             {
                 return Redirect("~/Identity/Account/Login");
             }
-            var username = User.Identity!.Name;
-            var user = _db.Users.Include(_user => _user.WatchList).FirstOrDefault(_user => _user.UserName.Equals(username));
-            var movie = AllMovies
-                .FirstOrDefault(movie => movie.name!.Equals(movieName)
-                && user!.WatchList!
-                .Count(_movie => _movie.name!.Equals(movieName)) == 0);
-
-            if (movie != default(Movie))
+            var user = GetUser();
+            if (user != default(AppUser))
             {
-                if (_db.Movies.Count(_movie => _movie.name!.Equals(movieName)) == 0)
+                var watchList = GetUserWatchList(user);
+                var movie = (from m in AllMovies
+                             where m.name == movieName && watchList.Count(_movie => string.Equals(_movie.name, movieName)) == 0
+                             select m).FirstOrDefault();
+                if (movie != default(Movie))
                 {
-                    user!.WatchList!.Add(movie);
-                    _db.SaveChanges();
+                    if ((from m in _db.Movies where string.Equals(m.name, movieName) select m).Count() == 0)
+                    {
+                        user!.WatchList!.Add(movie);
+                        _db.SaveChanges();
+                    }
                 }
             }
             return RedirectToAction("MoviesList");
