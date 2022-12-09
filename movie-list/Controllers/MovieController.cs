@@ -2,30 +2,56 @@
 using movie_list.Models;
 using System.Diagnostics;
 using movie_list.ApiClient;
+using movie_list.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace movie_list.Controllers
 {
     public class MovieController : Controller
     {
-        private readonly ILogger<AuthController> _logger;
         private readonly MovieApiClient<Movie> _apiClient;
+        private readonly MovieDbContext _db;
+        private List<Movie> AllMovies;
 
-        public MovieController(ILogger<AuthController> logger, MovieApiClient<Movie> apiClient)
+        public MovieController(MovieApiClient<Movie> apiClient, MovieDbContext db)
         {
-            _logger = logger;
+            _db = db;
             _apiClient = apiClient;
+            var response = _apiClient.GetMovies();
+            AllMovies = response.Result.Take(20).ToList();
         }
 
         public IActionResult MoviesList()
         {
-            var response = _apiClient.GetMovies();
-            var movies = response.Result.Take(20).ToList();
-            return View(movies);
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
+            return View(AllMovies);
         }
 
-        public IActionResult AddToWatchList()
+        public IActionResult AddToWatchList(string movieName)
         {
-            return View();
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
+            var username = User.Identity!.Name;
+            var user = _db.Users.Include(_user => _user.WatchList).FirstOrDefault(_user => _user.UserName.Equals(username));
+            var movie = AllMovies
+                .FirstOrDefault(movie => movie.name!.Equals(movieName)
+                && user!.WatchList!
+                .Count(_movie => _movie.name!.Equals(movieName)) == 0);
+
+            if (movie != default(Movie))
+            {
+                if (_db.Movies.Count(_movie => _movie.name!.Equals(movieName)) == 0)
+                {
+                    user!.WatchList!.Add(movie);
+                    _db.SaveChanges();
+                }
+            }
+            return RedirectToAction("MoviesList");
         }
     }
 }
