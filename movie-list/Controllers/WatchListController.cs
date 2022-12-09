@@ -28,9 +28,9 @@ namespace movie_list.Controllers
 
         private List<Movie> GetUserWatchList(AppUser user)
         {
-            return (from m in _db.Movies
-                   where m.Users!.Count(_user => string.Equals(user.UserName, _user.UserName)) > 0
-                   select m).ToList();
+            return (from m in _db.Movies.Include(movie => movie.User)
+                    where string.Equals(user.UserName, m.User!.UserName)
+                    select m).ToList();
         }
 
         public IActionResult MyWatchList()
@@ -45,6 +45,7 @@ namespace movie_list.Controllers
                 var watchList = GetUserWatchList(user);
                 return View(watchList);
             }
+            Console.WriteLine("not authenticated");
             return View();
         }
 

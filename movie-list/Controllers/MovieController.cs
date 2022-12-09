@@ -14,12 +14,21 @@ namespace movie_list.Controllers
         private readonly MovieDbContext _db;
         private List<Movie> AllMovies;
 
+        private bool isFailed = false;
+
         public MovieController(MovieApiClient<Movie> apiClient, MovieDbContext db)
         {
             _db = db;
             _apiClient = apiClient;
-            var response = _apiClient.GetMovies();
-            AllMovies = response.Result.Take(20).ToList();
+            try
+            {
+                var response = _apiClient.GetMovies();
+                AllMovies = response.Result.Take(20).ToList();
+            }
+            catch (Exception)
+            {
+                isFailed = true;
+            }
         }
 
         public IActionResult MoviesList()
@@ -28,6 +37,9 @@ namespace movie_list.Controllers
             {
                 return Redirect("~/Identity/Account/Login");
             }
+            TempData["Error"] = isFailed;
+            if (isFailed)
+                return View();
             return View(AllMovies);
         }
 
@@ -43,13 +55,14 @@ namespace movie_list.Controllers
 
         private List<Movie> GetUserWatchList(AppUser user)
         {
-            return (from m in _db.Movies
-                    where m.Users!.Count(_user => string.Equals(user.UserName, _user.UserName)) > 0
+            return (from m in _db.Movies.Include(movie => movie.User)
+                    where string.Equals(user.UserName, m.User!.UserName)
                     select m).ToList();
         }
 
         public IActionResult AddToWatchList(string movieName)
         {
+            TempData["Error"] = isFailed;
             if (!User.Identity!.IsAuthenticated)
             {
                 return Redirect("~/Identity/Account/Login");

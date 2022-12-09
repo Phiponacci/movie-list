@@ -14,10 +14,10 @@ namespace movie_list.Models
     {
         [Key]
         public string emsId { get; set; }
-        public string? emsVersionId { get; set; }
         public string? name { get; set; }
         public string? releaseDate { get; set; }
         public PosterImage? posterImage { get; set; }
-        public ICollection<AppUser>? Users { get; set; }
+        [Key]
+        public AppUser? User { get; set; }
     }
 }
