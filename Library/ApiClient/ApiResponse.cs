@@ -1,12 +1,16 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace movie_list.ApiClient
 {
     public class Response<T>
     {
-        public Data<T>? data { get; set; }
+        [Required]
+        public Data<T> data { get; set; }
     }
     public class Data<T>
     {
-        public List<T>? upcoming { get; set; }
+        [Required]
+        public List<T> upcoming { get; set; }
     }
 }

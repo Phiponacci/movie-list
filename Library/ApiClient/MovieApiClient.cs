@@ -8,11 +8,16 @@ namespace movie_list.ApiClient
         private readonly HttpClient client;
         private readonly string MOVIE_API_URL;
         private readonly string API_KEY;
-        public MovieApiClient(IConfiguration configuration)
+
+        public MovieApiClient()
+        {
+            client = new();
+        }
+
+        public MovieApiClient(IConfiguration configuration): this()
         {
             MOVIE_API_URL = configuration["MovieApi:Url"];
             API_KEY = configuration["MovieApi:Key"];
-            client = new();
         }
 
         public async Task<List<T>> GetMovies()
@@ -30,7 +35,12 @@ namespace movie_list.ApiClient
             using var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var body = await response.Content.ReadAsStringAsync();
-            var res = JsonConvert.DeserializeObject<Response<T>>(body);
+            return CreateMoviesFromJson(body);
+        }
+
+        public List<T> CreateMoviesFromJson(string json)
+        {
+            var res = JsonConvert.DeserializeObject<Response<T>>(json);
             return res?.data?.upcoming!;
         }
     }
