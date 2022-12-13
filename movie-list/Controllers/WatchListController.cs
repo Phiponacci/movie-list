@@ -1,36 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using movie_list.Models;
-using movie_list.Data;
-using Microsoft.EntityFrameworkCore;
-using movie_list.Areas.Identity.Data;
+using Library.Models;
+using Library.DataSource.Store;
 
 namespace movie_list.Controllers
 {
     public class WatchListController : Controller
     {
-        private readonly MovieDbContext _db;
+        private readonly IStore<Movie> _store;
 
-        public WatchListController(MovieDbContext db)
+        public WatchListController(IStore<Movie> store)
         {
-            _db = db;
+            _store = store;
         }
 
         private AppUser? GetUser()
         {
             var username = User.Identity!.Name;
-            return (from u in _db.Users
-                    where string.Equals(username, u.UserName)
-                    select u)
-                .Include(_user => _user.WatchList!)
-                .ThenInclude(watchList => watchList.posterImage)
-                .FirstOrDefault();
-        }
-
-        private List<Movie> GetUserWatchList(AppUser user)
-        {
-            return (from m in _db.Movies.Include(movie => movie.User)
-                    where string.Equals(user.UserName, m.User!.UserName)
-                    select m).ToList();
+            return _store.GetUserByUserName(username!);
         }
 
         public IActionResult MyWatchList()
@@ -42,10 +28,9 @@ namespace movie_list.Controllers
             var user = GetUser();
             if (user != default(AppUser))
             {
-                var watchList = GetUserWatchList(user);
+                var watchList = _store.GetWatchListByUserName(user.UserName);
                 return View(watchList);
             }
-            Console.WriteLine("not authenticated");
             return View();
         }
 
@@ -56,13 +41,9 @@ namespace movie_list.Controllers
                 return Redirect("~/Identity/Account/Login");
             }
             var user = GetUser();
-            var movie = user!.WatchList!.FirstOrDefault(movie => movie.name!.Equals(movieName));
-
-            if (movie != default(Movie))
+            if (user != default(AppUser))
             {
-                _db.Movies.Remove(movie);
-                user!.WatchList!.Remove(movie);
-                _db.SaveChanges();
+                _store.Delete(user.UserName, movieName);
             }
             return RedirectToAction("MyWatchList");
         }

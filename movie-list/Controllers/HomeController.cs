@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using movie_list.Models;
 using System.Diagnostics;
 using movie_list.ApiClient;
 

@@ -1,9 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using movie_list.ApiClient;
-using movie_list.Data;
-using movie_list.Models;
-using movie_list.Areas.Identity.Data;
+using Library.Models;
+using Library.DataSource.Store;
+using Library.DataSource;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("MovieDbContextConnection") ?? throw new InvalidOperationException("Connection string 'MovieDbContextConnection' not found.");
@@ -17,6 +17,8 @@ builder.Services.AddDbContext<MovieDbContext>(options => options.UseSqlite(conne
 
 builder.Services.AddDefaultIdentity<AppUser>()
     .AddEntityFrameworkStores<MovieDbContext>();
+
+builder.Services.AddScoped<IStore<Movie>, MovieStore>();
 
 var app = builder.Build();
 

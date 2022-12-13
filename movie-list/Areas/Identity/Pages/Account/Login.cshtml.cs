@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using movie_list.Areas.Identity.Data;
+using Library.Models;
 
 namespace movie_list.Areas.Identity.Pages.Account
 {

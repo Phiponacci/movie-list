@@ -4,12 +4,12 @@
 
 using System;
 using System.Threading.Tasks;
+using Library.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using movie_list.Areas.Identity.Data;
 
 namespace movie_list.Areas.Identity.Pages.Account
 {

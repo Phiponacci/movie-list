@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Library.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using movie_list.Areas.Identity.Data;
-using movie_list.Models;
 
-namespace movie_list.Data;
+namespace Library.DataSource;
 
 public class MovieDbContext : IdentityDbContext<AppUser>
 {

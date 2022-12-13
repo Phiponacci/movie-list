@@ -1,7 +1,6 @@
-﻿using movie_list.Areas.Identity.Data;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace movie_list.Models
+namespace Library.Models
 {
     public class PosterImage
     {
